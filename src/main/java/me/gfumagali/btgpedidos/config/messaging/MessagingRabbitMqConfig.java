@@ -1,8 +1,10 @@
 package me.gfumagali.btgpedidos.config.messaging;
 
+import me.gfumagali.btgpedidos.model.dto.PedidoDTO;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +18,17 @@ public class MessagingRabbitMqConfig {
     }
 
     @Bean
+    public DefaultClassMapper classMapper() {
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+        classMapper.setDefaultType(PedidoDTO.class);
+        return classMapper;
+    }
+
+    @Bean
     public Jackson2JsonMessageConverter Jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setClassMapper(classMapper());
+        return converter;
     }
 
     @Bean
@@ -26,7 +37,5 @@ public class MessagingRabbitMqConfig {
         rabbitTemplate.setMessageConverter(Jackson2JsonMessageConverter());
         return rabbitTemplate;
     }
-
-
 
 }
