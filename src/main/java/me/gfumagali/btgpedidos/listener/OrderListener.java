@@ -18,7 +18,8 @@ public class OrderListener {
 
     @RabbitHandler
     public void receive(@Payload OrderDTO in) {
-        log.info("Pedido recebido: {}", in.getOrderCode());
+        log.info("Order received: {} - {}", in.getOrderCode(), in.getClientCode());
+        log.trace("Items: {}", in.getItems());
         orderService.create(in);
     }
 }
