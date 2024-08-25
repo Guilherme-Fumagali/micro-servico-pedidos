@@ -1,4 +1,4 @@
-package me.gfumagali.btgpedidos.repository.model;
+package me.gfumagali.btgpedidos.repository.model.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "orderTotalValue")
 public class OrderTotalValue {
     @Id
-    private long codigoPedido;
-    private double valorTotal;
+    private Long orderCode;
+    private Double totalValue;
 }

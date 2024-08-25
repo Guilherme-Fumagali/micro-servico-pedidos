@@ -1,12 +1,12 @@
 package me.gfumagali.btgpedidos.service;
 
 import lombok.RequiredArgsConstructor;
-import me.gfumagali.btgpedidos.listener.dto.OrderDto;
+import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
 import me.gfumagali.btgpedidos.repository.ClientOrderRepository;
 import me.gfumagali.btgpedidos.repository.OrderTotalValueRepository;
-import me.gfumagali.btgpedidos.repository.model.ClientOrders;
-import me.gfumagali.btgpedidos.repository.model.Order;
-import me.gfumagali.btgpedidos.repository.model.OrderTotalValue;
+import me.gfumagali.btgpedidos.repository.model.documents.ClientOrders;
+import me.gfumagali.btgpedidos.repository.model.documents.Order;
+import me.gfumagali.btgpedidos.repository.model.documents.OrderTotalValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,67 +19,68 @@ import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
-public class PedidoService {
+public class OrderService {
     private final ClientOrderRepository clientOrderRepository;
     private final OrderTotalValueRepository orderTotalValueRepository;
 
     @Transactional
-    public void saveOrder(OrderDto pedidoDTO) {
+    public void create(OrderDTO orderDTO) {
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            executor.submit(() -> createClienteOrder(pedidoDTO));
-            executor.submit(() -> createOrderTotalValue(pedidoDTO));
+            executor.submit(() -> storeClientOrder(orderDTO));
+            executor.submit(() -> storeOrderTotalValue(orderDTO));
             executor.shutdown();
         }
     }
 
     public String getTotalValue(Long id) {
         return orderTotalValueRepository.findById(id)
-                .map(OrderTotalValue::getValorTotal)
+                .map(OrderTotalValue::getTotalValue)
                 .map(String::valueOf)
                 .orElse("Pedido não encontrado");
     }
 
 
     public String getOrdersQuantity(Long id) {
-        return clientOrderRepository.getQuantidadePedidosByCodigoCliente(id)
-                .map(ClientOrders::getQuantidadePedidos)
+        return clientOrderRepository.getOrdersQuantityByClientCode(id)
+                .map(ClientOrders::getOrdersQuantity)
                 .map(String::valueOf)
                 .orElse("Cliente não encontrado");
     }
 
     public List<Order> getOrders(Long id) {
-        return clientOrderRepository.getPedidosByCodigoCliente(id)
-                .map(ClientOrders::getPedidos)
+        return clientOrderRepository.getOrdersByClientCode(id)
+                .map(ClientOrders::getOrders)
                 .map(HashMap::values)
                 .map(ArrayList::new)
                 .orElseGet(ArrayList::new);
     }
 
-    private void createClienteOrder(OrderDto pedidoDTO) {
+    private void storeClientOrder(OrderDTO orderDTO) {
         Order order = new Order(
-                String.valueOf(pedidoDTO.getCodigoPedido()),
+                orderDTO.getOrderCode(),
                 LocalDateTime.now(),
-                pedidoDTO.getItems()
+                orderDTO.getItems()
         );
 
-        ClientOrders clientOrders = clientOrderRepository.findById(pedidoDTO.getCodigoCliente()).orElseGet(() ->
+        ClientOrders clientOrders = clientOrderRepository.findById(orderDTO.getClientCode()).orElseGet(() ->
                 new ClientOrders(
-                        pedidoDTO.getCodigoCliente(),
+                        orderDTO.getClientCode(),
                         0L,
                         new HashMap<>()
                 ));
 
-        clientOrders.getPedidos().put(pedidoDTO.getCodigoPedido(), order);
-        clientOrders.setQuantidadePedidos(clientOrders.getQuantidadePedidos() + 1);
+        clientOrders.getOrders().put(orderDTO.getOrderCode(), order);
+        clientOrders.setOrdersQuantity(clientOrders.getOrdersQuantity() + 1);
 
         clientOrderRepository.save(clientOrders);
     }
 
-    private void createOrderTotalValue(OrderDto pedidoDTO) {
-        orderTotalValueRepository.save(new OrderTotalValue(
-                pedidoDTO.getCodigoPedido(),
-                pedidoDTO.getItems().stream().mapToDouble(item -> item.getPreco() * item.getQuantidade()).sum()
-        ));
+    private void storeOrderTotalValue(OrderDTO orderDTO) {
+        OrderTotalValue orderTotalValue = new OrderTotalValue(
+                orderDTO.getOrderCode(),
+                orderDTO.getItems().stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum()
+        );
+        orderTotalValueRepository.save(orderTotalValue);
     }
 
 }

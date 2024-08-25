@@ -2,8 +2,8 @@ package me.gfumagali.btgpedidos.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gfumagali.btgpedidos.listener.dto.OrderDto;
-import me.gfumagali.btgpedidos.service.PedidoService;
+import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
+import me.gfumagali.btgpedidos.service.OrderService;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @RabbitListener(queues = "${application.listener.queue.name}")
-public class PedidosListener {
-    private final PedidoService pedidoService;
+public class OrderListener {
+    private final OrderService orderService;
 
     @RabbitHandler
-    public void receive(@Payload OrderDto in) {
-        log.info("Pedido recebido: {}", in.getCodigoPedido());
-        pedidoService.saveOrder(in);
+    public void receive(@Payload OrderDTO in) {
+        log.info("Pedido recebido: {}", in.getOrderCode());
+        orderService.create(in);
     }
 }

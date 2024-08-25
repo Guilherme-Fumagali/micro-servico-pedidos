@@ -1,6 +1,6 @@
 package me.gfumagali.btgpedidos.config.messaging;
 
-import me.gfumagali.btgpedidos.listener.dto.OrderDto;
+import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,7 +23,7 @@ public class MessagingConfig {
     @Bean
     public DefaultClassMapper classMapper() {
         DefaultClassMapper classMapper = new DefaultClassMapper();
-        classMapper.setDefaultType(OrderDto.class);
+        classMapper.setDefaultType(OrderDTO.class);
         return classMapper;
     }
 

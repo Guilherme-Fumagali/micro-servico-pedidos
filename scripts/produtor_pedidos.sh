@@ -55,5 +55,5 @@ do
     amqp-publish  --username "$RABBITMQ_USERNAME" \
                   --password "$RABBITMQ_PASSWORD" \
                   -r pedidos -C application/json  \
-                  -b '{"codigoPedido": '"$RANDOM"', "codigoCliente": '"$(random_number "$id_cliente_max")"', "items": '"$items"'}'
+                  -b '{"codigoPedido": '"$RANDOM"', "codigoCliente": '"$(random_number "$id_cliente_max")"', "itens": '"$items"'}'
 done

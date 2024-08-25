@@ -1,4 +1,4 @@
-package me.gfumagali.btgpedidos.repository.model;
+package me.gfumagali.btgpedidos.repository.model.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,9 +12,9 @@ import java.util.HashMap;
 @Document(collection = "clientOrders")
 public class ClientOrders {
     @Id
-    private long codigoCliente;
+    private Long clientCode;
 
-    private Long quantidadePedidos;
+    private Long ordersQuantity;
 
-    private HashMap<Long, Order> pedidos;
+    private HashMap<Long, Order> orders;
 }
