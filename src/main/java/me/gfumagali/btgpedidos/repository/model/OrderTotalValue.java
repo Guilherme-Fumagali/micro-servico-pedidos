@@ -10,6 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "orderTotalValue")
 public class OrderTotalValue {
     @Id
-    private int codigoPedido;
+    private long codigoPedido;
     private double valorTotal;
 }

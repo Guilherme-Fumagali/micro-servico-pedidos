@@ -12,9 +12,9 @@ import java.util.HashMap;
 @Document(collection = "clientOrders")
 public class ClientOrders {
     @Id
-    private int codigoCliente;
+    private long codigoCliente;
 
-    private int quantidadePedidos;
+    private long quantidadePedidos;
 
-    private HashMap<Integer, Order> pedidos;
+    private HashMap<Long, Order> pedidos;
 }

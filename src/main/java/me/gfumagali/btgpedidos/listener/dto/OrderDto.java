@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class OrderDto {
-    private int codigoPedido;
-    private int codigoCliente;
+    private long codigoPedido;
+    private long codigoCliente;
     private List<ItemDto> items;
 }
