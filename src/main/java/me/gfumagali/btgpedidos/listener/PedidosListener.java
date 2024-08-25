@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@RabbitListener(queues = "pedidos")
+@RabbitListener(queues = "${application.listener.queue.name}")
 public class PedidosListener {
     private final PedidoService pedidoService;
 
