@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -40,18 +41,18 @@ public class PedidoService {
 
 
     public String getOrdersQuantity(Long id) {
-        return clientOrderRepository.findById(id)
+        return clientOrderRepository.getQuantidadePedidosByCodigoCliente(id)
                 .map(ClientOrders::getQuantidadePedidos)
                 .map(String::valueOf)
                 .orElse("Cliente não encontrado");
     }
 
     public List<Order> getOrders(Long id) {
-        return clientOrderRepository.findById(id)
+        return clientOrderRepository.getPedidosByCodigoCliente(id)
                 .map(ClientOrders::getPedidos)
                 .map(HashMap::values)
-                .map(List::copyOf)
-                .orElse(List.of());
+                .map(ArrayList::new)
+                .orElseGet(ArrayList::new);
     }
 
     private void createClienteOrder(OrderDto pedidoDTO) {
@@ -64,7 +65,7 @@ public class PedidoService {
         ClientOrders clientOrders = clientOrderRepository.findById(pedidoDTO.getCodigoCliente()).orElseGet(() ->
                 new ClientOrders(
                         pedidoDTO.getCodigoCliente(),
-                        0,
+                        0L,
                         new HashMap<>()
                 ));
 

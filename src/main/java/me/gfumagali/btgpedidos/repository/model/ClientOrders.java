@@ -14,7 +14,7 @@ public class ClientOrders {
     @Id
     private long codigoCliente;
 
-    private long quantidadePedidos;
+    private Long quantidadePedidos;
 
     private HashMap<Long, Order> pedidos;
 }
