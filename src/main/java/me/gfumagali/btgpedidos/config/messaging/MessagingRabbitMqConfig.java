@@ -6,15 +6,18 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MessagingRabbitMqConfig {
+    @Value("${application.listener.queue.name}")
+    private String queueName;
 
     @Bean
     public Queue queue() {
-        return new Queue("pedidos", false);
+        return new Queue(queueName);
     }
 
     @Bean
@@ -25,7 +28,7 @@ public class MessagingRabbitMqConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter Jackson2JsonMessageConverter() {
+    public Jackson2JsonMessageConverter messageConverter() {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
         converter.setClassMapper(classMapper());
         return converter;
@@ -33,9 +36,8 @@ public class MessagingRabbitMqConfig {
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(Jackson2JsonMessageConverter());
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(messageConverter());
         return rabbitTemplate;
     }
-
 }
