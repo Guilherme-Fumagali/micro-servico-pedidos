@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,6 +29,29 @@ public class PedidoService {
             executor.submit(() -> createOrderTotalValue(pedidoDTO));
             executor.shutdown();
         }
+    }
+
+    public String getTotalValue(Long id) {
+        return orderTotalValueRepository.findById(id)
+                .map(OrderTotalValue::getValorTotal)
+                .map(String::valueOf)
+                .orElse("Pedido não encontrado");
+    }
+
+
+    public String getOrdersQuantity(Long id) {
+        return clientOrderRepository.findById(id)
+                .map(ClientOrders::getQuantidadePedidos)
+                .map(String::valueOf)
+                .orElse("Cliente não encontrado");
+    }
+
+    public List<Order> getOrders(Long id) {
+        return clientOrderRepository.findById(id)
+                .map(ClientOrders::getPedidos)
+                .map(HashMap::values)
+                .map(List::copyOf)
+                .orElse(List.of());
     }
 
     private void createClienteOrder(OrderDto pedidoDTO) {
@@ -56,4 +80,5 @@ public class PedidoService {
                 pedidoDTO.getItems().stream().mapToDouble(item -> item.getPreco() * item.getQuantidade()).sum()
         ));
     }
+
 }
