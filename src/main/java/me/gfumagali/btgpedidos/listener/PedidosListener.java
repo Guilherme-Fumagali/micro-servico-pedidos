@@ -18,7 +18,7 @@ public class PedidosListener {
 
     @RabbitHandler
     public void receive(@Payload OrderDto in) {
-        log.info("Pedido recebido: {}", in);
+        log.info("Pedido recebido: {}", in.getCodigoPedido());
         pedidoService.saveOrder(in);
     }
 }
