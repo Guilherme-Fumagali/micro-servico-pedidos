@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.gfumagali.btgpedidos.model.documents.ClientOrders;
 import me.gfumagali.btgpedidos.model.documents.Order;
 import me.gfumagali.btgpedidos.model.documents.OrderTotalValue;
-import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
+import me.gfumagali.btgpedidos.model.dto.OrderDTO;
 import me.gfumagali.btgpedidos.model.exception.ResourceNotFoundException;
 import me.gfumagali.btgpedidos.model.mappers.OrderMapper;
 import me.gfumagali.btgpedidos.model.mappers.OrderTotalValueMapper;

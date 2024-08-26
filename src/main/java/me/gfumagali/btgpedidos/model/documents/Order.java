@@ -3,7 +3,7 @@ package me.gfumagali.btgpedidos.model.documents;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import me.gfumagali.btgpedidos.model.dto.listener.ItemDTO;
+import me.gfumagali.btgpedidos.model.dto.ItemDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
