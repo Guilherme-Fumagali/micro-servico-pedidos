@@ -14,7 +14,7 @@ public class ClientOrders {
     @Id
     private Long clientCode;
 
-    private Long ordersQuantity;
+    private Integer ordersQuantity;
 
     private HashMap<Long, Order> orders;
 }

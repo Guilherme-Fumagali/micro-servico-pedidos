@@ -76,13 +76,13 @@ public class OrderService {
 
             return new ClientOrders(
                     orderDTO.getClientCode(),
-                    0L,
+                    0,
                     new HashMap<>()
             );
         });
 
         clientOrders.getOrders().put(orderDTO.getOrderCode(), order);
-        clientOrders.setOrdersQuantity(clientOrders.getOrdersQuantity() + 1);
+        clientOrders.setOrdersQuantity(clientOrders.getOrders().size());
         log.trace("Quantity of orders for client {} is now {}", orderDTO.getClientCode(), clientOrders.getOrdersQuantity());
 
         log.debug("Storing order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
