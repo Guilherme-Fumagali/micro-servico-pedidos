@@ -2,12 +2,12 @@ package me.gfumagali.btgpedidos.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
+import me.gfumagali.btgpedidos.model.documents.ClientOrders;
+import me.gfumagali.btgpedidos.model.documents.Order;
+import me.gfumagali.btgpedidos.model.documents.OrderTotalValue;
+import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
 import me.gfumagali.btgpedidos.repository.ClientOrderRepository;
 import me.gfumagali.btgpedidos.repository.OrderTotalValueRepository;
-import me.gfumagali.btgpedidos.repository.model.documents.ClientOrders;
-import me.gfumagali.btgpedidos.repository.model.documents.Order;
-import me.gfumagali.btgpedidos.repository.model.documents.OrderTotalValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

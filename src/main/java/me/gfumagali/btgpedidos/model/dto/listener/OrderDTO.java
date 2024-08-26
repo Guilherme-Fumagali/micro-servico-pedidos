@@ -1,4 +1,4 @@
-package me.gfumagali.btgpedidos.listener.dto;
+package me.gfumagali.btgpedidos.model.dto.listener;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

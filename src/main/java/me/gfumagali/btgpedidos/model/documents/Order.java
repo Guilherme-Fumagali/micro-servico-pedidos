@@ -1,9 +1,9 @@
-package me.gfumagali.btgpedidos.repository.model.documents;
+package me.gfumagali.btgpedidos.model.documents;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import me.gfumagali.btgpedidos.listener.dto.ItemDTO;
+import me.gfumagali.btgpedidos.model.dto.listener.ItemDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;

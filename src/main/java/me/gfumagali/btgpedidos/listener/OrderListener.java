@@ -2,7 +2,7 @@ package me.gfumagali.btgpedidos.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
+import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
 import me.gfumagali.btgpedidos.service.OrderService;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

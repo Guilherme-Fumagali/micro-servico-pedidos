@@ -1,6 +1,6 @@
 package me.gfumagali.btgpedidos.repository;
 
-import me.gfumagali.btgpedidos.repository.model.documents.ClientOrders;
+import me.gfumagali.btgpedidos.model.documents.ClientOrders;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

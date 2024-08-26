@@ -1,4 +1,4 @@
-package me.gfumagali.btgpedidos.repository.model.documents;
+package me.gfumagali.btgpedidos.model.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

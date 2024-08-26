@@ -1,7 +1,7 @@
 package me.gfumagali.btgpedidos.controller;
 
 import lombok.RequiredArgsConstructor;
-import me.gfumagali.btgpedidos.repository.model.documents.Order;
+import me.gfumagali.btgpedidos.model.documents.Order;
 import me.gfumagali.btgpedidos.service.OrderService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

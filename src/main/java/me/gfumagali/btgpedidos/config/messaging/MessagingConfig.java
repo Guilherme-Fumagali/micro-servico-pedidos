@@ -1,6 +1,6 @@
 package me.gfumagali.btgpedidos.config.messaging;
 
-import me.gfumagali.btgpedidos.listener.dto.OrderDTO;
+import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
