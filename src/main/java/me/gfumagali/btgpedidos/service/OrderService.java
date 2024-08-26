@@ -72,19 +72,8 @@ public class OrderService {
         Order order = orderMapper.toDocument(orderDTO);
         log.trace("Storing order {}", order);
 
-        ClientOrders clientOrders = clientOrderRepository.findById(orderDTO.getClientCode()).orElseGet(() -> {
-            log.debug("Client {} not found, initializing new document", orderDTO.getClientCode());
-
-            return new ClientOrders(
-                    orderDTO.getClientCode(),
-                    0,
-                    new HashMap<>()
-            );
-        });
-
-        clientOrders.getOrders().put(orderDTO.getOrderCode(), order);
-        clientOrders.setOrdersQuantity(clientOrders.getOrders().size());
-        log.trace("Quantity of orders for client {} is now {}", orderDTO.getClientCode(), clientOrders.getOrdersQuantity());
+        ClientOrders clientOrders = getOrCreateClientOrders(orderDTO);
+        appendOrder(clientOrders, order);
 
         log.debug("Storing order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
         clientOrderRepository.save(clientOrders);
@@ -94,6 +83,24 @@ public class OrderService {
         OrderTotalValue orderTotalValue = orderTotalValueMapper.toDocument(orderDTO);
         log.debug("Storing total value {} for order {}", orderTotalValue.getTotalValue(), orderDTO.getOrderCode());
         orderTotalValueRepository.save(orderTotalValue);
+    }
+
+    private ClientOrders getOrCreateClientOrders(OrderDTO orderDTO) {
+        return clientOrderRepository.findById(orderDTO.getClientCode()).orElseGet(() -> {
+            log.debug("Client {} not found, initializing new document", orderDTO.getClientCode());
+
+            return new ClientOrders(
+                    orderDTO.getClientCode(),
+                    0,
+                    new HashMap<>()
+            );
+        });
+    }
+
+    private void appendOrder(ClientOrders clientOrders, Order order) {
+        clientOrders.getOrders().put(order.getOrderCode(), order);
+        clientOrders.setOrdersQuantity(clientOrders.getOrders().size());
+        log.trace("Quantity of orders for client {} is now {}", order.getOrderCode(), clientOrders.getOrdersQuantity());
     }
 
 }
