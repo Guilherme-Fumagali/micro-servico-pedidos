@@ -6,6 +6,7 @@ import me.gfumagali.btgpedidos.model.documents.ClientOrders;
 import me.gfumagali.btgpedidos.model.documents.Order;
 import me.gfumagali.btgpedidos.model.documents.OrderTotalValue;
 import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
+import me.gfumagali.btgpedidos.model.exception.ResourceNotFoundException;
 import me.gfumagali.btgpedidos.repository.ClientOrderRepository;
 import me.gfumagali.btgpedidos.repository.OrderTotalValueRepository;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class OrderService {
         return orderTotalValueRepository.findById(id)
                 .map(OrderTotalValue::getTotalValue)
                 .map(String::valueOf)
-                .orElse("Pedido não encontrado");
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado"));
     }
 
 
@@ -51,7 +52,7 @@ public class OrderService {
         return clientOrderRepository.getOrdersQuantityByClientCode(id)
                 .map(ClientOrders::getOrdersQuantity)
                 .map(String::valueOf)
-                .orElse("Cliente não encontrado");
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     public List<Order> getOrders(Long id) {
@@ -60,7 +61,7 @@ public class OrderService {
                 .map(ClientOrders::getOrders)
                 .map(HashMap::values)
                 .map(ArrayList::new)
-                .orElseGet(ArrayList::new);
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     private void storeClientOrder(OrderDTO orderDTO) {
