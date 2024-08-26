@@ -14,6 +14,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration
@@ -59,7 +60,11 @@ public class MessagingConfig implements RabbitListenerConfigurer {
     @Bean
     public RabbitListenerErrorHandler orderErrorHandler() {
         return (message, exception, params) -> {
-            log.error("Error processing message: {}", message);
+            log.error("Error processing message {} with payload {}", message, exception != null ? exception.getPayload() : null);
+            if (params.getCause() instanceof MethodArgumentNotValidException)
+                log.error("Caused by validation error: {}", ((MethodArgumentNotValidException) params.getCause()).getBindingResult());
+            else
+                log.error("Caused by: ", params.getCause());
             return null;
         };
     }
