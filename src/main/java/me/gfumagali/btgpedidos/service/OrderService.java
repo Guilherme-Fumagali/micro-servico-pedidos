@@ -7,12 +7,13 @@ import me.gfumagali.btgpedidos.model.documents.Order;
 import me.gfumagali.btgpedidos.model.documents.OrderTotalValue;
 import me.gfumagali.btgpedidos.model.dto.listener.OrderDTO;
 import me.gfumagali.btgpedidos.model.exception.ResourceNotFoundException;
+import me.gfumagali.btgpedidos.model.mappers.OrderMapper;
+import me.gfumagali.btgpedidos.model.mappers.OrderTotalValueMapper;
 import me.gfumagali.btgpedidos.repository.ClientOrderRepository;
 import me.gfumagali.btgpedidos.repository.OrderTotalValueRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,9 @@ import java.util.concurrent.Executors;
 public class OrderService {
     private final ClientOrderRepository clientOrderRepository;
     private final OrderTotalValueRepository orderTotalValueRepository;
+
+    private final OrderTotalValueMapper orderTotalValueMapper;
+    private final OrderMapper orderMapper;
 
     @Transactional
     public void create(OrderDTO orderDTO) {
@@ -65,11 +69,7 @@ public class OrderService {
     }
 
     private void storeClientOrder(OrderDTO orderDTO) {
-        Order order = new Order(
-                orderDTO.getOrderCode(),
-                LocalDateTime.now(),
-                orderDTO.getItems()
-        );
+        Order order = orderMapper.toDocument(orderDTO);
         log.trace("Storing order {}", order);
 
         ClientOrders clientOrders = clientOrderRepository.findById(orderDTO.getClientCode()).orElseGet(() -> {
@@ -91,11 +91,7 @@ public class OrderService {
     }
 
     private void storeOrderTotalValue(OrderDTO orderDTO) {
-        OrderTotalValue orderTotalValue = new OrderTotalValue(
-                orderDTO.getOrderCode(),
-                orderDTO.getItems().stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum()
-        );
-
+        OrderTotalValue orderTotalValue = orderTotalValueMapper.toDocument(orderDTO);
         log.debug("Storing total value {} for order {}", orderTotalValue.getTotalValue(), orderDTO.getOrderCode());
         orderTotalValueRepository.save(orderTotalValue);
     }
