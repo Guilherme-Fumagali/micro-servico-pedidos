@@ -16,7 +16,7 @@ import java.util.List;
 public class ClientController {
     private final OrderService pedidoService;
 
-    @GetMapping("/quantidade/{id}")
+    @GetMapping("/{id}/quantidade")
     public String getOrdersQuantity(@PathVariable Long id) {
         return pedidoService.getOrdersQuantity(id);
     }
