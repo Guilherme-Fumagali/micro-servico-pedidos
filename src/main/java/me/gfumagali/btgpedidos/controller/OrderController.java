@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/pedido")
 public class OrderController {
-    private final OrderService pedidoService;
+    private final OrderService orderService;
 
     @GetMapping("/valor-total/{id}")
     public String getTotalValue(@PathVariable Long id) {
-        return pedidoService.getTotalValue(id);
+        return orderService.getTotalValue(id);
     }
 
 }

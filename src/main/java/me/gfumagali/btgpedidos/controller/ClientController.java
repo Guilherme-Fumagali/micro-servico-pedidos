@@ -14,16 +14,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/cliente/pedidos")
 public class ClientController {
-    private final OrderService pedidoService;
+    private final OrderService orderService;
 
     @GetMapping("/{id}/quantidade")
     public String getOrdersQuantity(@PathVariable Long id) {
-        return pedidoService.getOrdersQuantity(id);
+        return orderService.getOrdersQuantity(id);
     }
 
     @GetMapping("/{id}")
     public List<Order> getOrders(@PathVariable Long id) {
-        return pedidoService.getOrders(id);
+        return orderService.getOrders(id);
     }
 
 }
