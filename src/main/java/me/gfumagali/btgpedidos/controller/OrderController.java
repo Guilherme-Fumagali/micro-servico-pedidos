@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final OrderService orderService;
 
-    @GetMapping(value = "/valor-total/{id}", produces = "text/plain")
+    @GetMapping(value = "/valor-total/{codigoPedido}", produces = "text/plain")
     @Operation(
             summary = "Valor total",
             description = "Recupera o valor total de um pedido a partir de seu código",
@@ -26,8 +26,8 @@ public class OrderController {
                     @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
             }
     )
-    public String getTotalValue(@PathVariable Long id) {
-        return orderService.getTotalValue(id);
+    public String getTotalValue(@PathVariable Long codigoPedido) {
+        return orderService.getTotalValue(codigoPedido);
     }
 
 }

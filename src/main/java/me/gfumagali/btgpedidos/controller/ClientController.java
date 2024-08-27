@@ -20,7 +20,7 @@ import java.util.List;
 public class ClientController {
     private final OrderService orderService;
 
-    @GetMapping(value = "/{id}/quantidade", produces = "text/plain")
+    @GetMapping(value = "/{codigoCliente}/quantidade", produces = "text/plain")
     @Operation(
             summary = "Quantidade de pedidos",
             description = "Recupera a quantidade de pedidos de um cliente a partir de seu código",
@@ -29,11 +29,11 @@ public class ClientController {
                     @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             }
     )
-    public String getOrdersQuantity(@PathVariable Long id) {
-        return orderService.getOrdersQuantity(id);
+    public String getOrdersQuantity(@PathVariable Long codigoCliente) {
+        return orderService.getOrdersQuantity(codigoCliente);
     }
 
-    @GetMapping(value = "/{id}", produces = "application/json")
+    @GetMapping(value = "/{codigoCliente}", produces = "application/json")
     @Operation(
             summary = "Pedidos",
             description = "Recupera os pedidos de um cliente a partir de seu código",
@@ -42,8 +42,8 @@ public class ClientController {
                     @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             }
     )
-    public List<Order> getOrders(@PathVariable Long id) {
-        return orderService.getOrders(id);
+    public List<Order> getOrders(@PathVariable Long codigoCliente) {
+        return orderService.getOrders(codigoCliente);
     }
 
 }
