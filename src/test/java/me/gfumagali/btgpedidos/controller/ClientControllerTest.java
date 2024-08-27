@@ -85,7 +85,7 @@ public class ClientControllerTest {
     }
 
     private String getJson(Order order) {
-        return "{\"codigoPedido\":" + order.getOrderCode() + ",\"dataPedido\":\"" + order.getOrderDate().toString() + "\",\"itens\":[" + order.getItems().stream().map(this::getJson).reduce((a, b) -> a + "," + b).orElse("") + "]}";
+        return "{\"codigoPedido\":" + order.getOrderCode() + ",\"dataPedido\":\"" + order.getOrderDate() + "\",\"itens\":[" + order.getItems().stream().map(this::getJson).reduce((a, b) -> a + "," + b).orElse("") + "]}";
     }
 
     private String getJson(ItemDTO item) {
