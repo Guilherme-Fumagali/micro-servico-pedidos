@@ -2,11 +2,13 @@ package me.gfumagali.btgpedidos.config.mongo;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class MongoConfig {
     @Value("${spring.data.mongodb.host}")
     private String host;
@@ -22,6 +24,7 @@ public class MongoConfig {
 
     @Bean
     public MongoClient mongoClient() {
+        log.info("Creating mongo client with host: {}, port: {}, username: {}", host, port, username);
         return MongoClients.create("mongodb://" + username + ":" + password + "@" + host + ":" + port);
     }
 
