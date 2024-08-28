@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@RabbitListener(queues = "${application.listener.queue.name}", errorHandler = "listenerErrorHandler")
+@RabbitListener(queues = "${spring.rabbitmq.queue}", errorHandler = "listenerErrorHandler")
 public class OrderListener {
     private final OrderService orderService;
 

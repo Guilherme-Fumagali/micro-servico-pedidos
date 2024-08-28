@@ -2,6 +2,7 @@ package me.gfumagali.btgpedidos.config.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.gfumagali.btgpedidos.config.properties.RabbitProperties;
 import me.gfumagali.btgpedidos.model.dto.OrderDTO;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
@@ -10,7 +11,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -19,14 +19,13 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @RequiredArgsConstructor
 @Slf4j
 public class MessagingConfig implements RabbitListenerConfigurer {
-    @Value("${application.listener.queue.name}")
-    private String queueName;
+    private final RabbitProperties rabbitProperties;
 
     private final LocalValidatorFactoryBean validator;
 
     @Bean
     public Queue queue() {
-        return new Queue(queueName);
+        return new Queue(rabbitProperties.getQueue());
     }
 
     @Bean
