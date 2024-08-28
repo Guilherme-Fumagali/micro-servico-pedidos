@@ -1,7 +1,7 @@
 services:
   mongo:
     image: mongo:7-jammy
-    restart: always
+    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -12,7 +12,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
