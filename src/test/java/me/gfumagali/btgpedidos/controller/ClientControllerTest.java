@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -42,7 +44,7 @@ public class ClientControllerTest {
     @Test
     public void whenGetOrders_thenReturnOrders() throws Exception {
         // Given
-        Order order = new Order(1L, LocalDateTime.now(), List.of(
+        Order order = new Order(1L, LocalDateTime.of(2021, 1, 1, 0, 0), List.of(
                 getExampleItemDTO(1, 25.5),
                 getExampleItemDTO(1, 25.75),
                 getExampleItemDTO(3, 16.25)
@@ -85,7 +87,9 @@ public class ClientControllerTest {
     }
 
     private String getJson(Order order) {
-        return "{\"codigoPedido\":" + order.getOrderCode() + ",\"dataPedido\":\"" + order.getOrderDate() + "\",\"itens\":[" + order.getItems().stream().map(this::getJson).reduce((a, b) -> a + "," + b).orElse("") + "]}";
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd'T'HH:mm:ss").toFormatter();
+        String isoDate = order.getOrderDate().format(formatter);
+        return "{\"codigoPedido\":" + order.getOrderCode() + ",\"dataPedido\":\"" + isoDate + "\",\"itens\":[" + order.getItems().stream().map(this::getJson).reduce((a, b) -> a + "," + b).orElse("") + "]}";
     }
 
     private String getJson(ItemDTO item) {
