@@ -16,6 +16,6 @@ public interface ClientOrderRepository extends MongoRepository<ClientOrders, Lon
     Optional<ClientOrders> getOrdersByClientCode(Long clientCode, Integer skip, Integer limit);
 
     @Query("{ 'clientCode' : ?0}")
-    @Update(pipeline = "{ '$set' : { 'orders.?1' : ?2, 'ordersQuantity': { $size: { $objectToArray: '$orders' } } } }")
+    @Update(pipeline = {"{ '$set' : { 'orders.?1' : ?2 } }", "{ '$set' : { 'ordersQuantity': { $size: { $objectToArray: '$orders' } } } }"})
     void upsertOrderByClientCode(Long clientCode, Long orderCode, Order order);
 }
