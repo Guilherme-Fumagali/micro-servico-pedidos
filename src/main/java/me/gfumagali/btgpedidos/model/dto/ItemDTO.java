@@ -6,6 +6,8 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @Schema(name = "Item", description = "DTO para leitura de uma unidade de produto no registro de Pedido consumido da fila")
@@ -26,5 +28,5 @@ public class ItemDTO {
     @Digits(integer = 10, fraction = 2, message = "Price must have up to 10 integer digits and 2 fraction digits")
     @NotNull(message = "Price is required")
     @Schema(description = "Preço do produto", example = "1.5", requiredMode = Schema.RequiredMode.REQUIRED)
-    private double price;
+    private BigDecimal price;
 }

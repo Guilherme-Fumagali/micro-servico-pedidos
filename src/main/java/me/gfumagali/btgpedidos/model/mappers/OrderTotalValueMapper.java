@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 public interface OrderTotalValueMapper extends DocumentMapper<OrderTotalValue, OrderDTO> {
 
     @Override
-    @Mapping(target = "orderCode", source = "orderCode")
-    @Mapping(target = "totalValue", expression = "java(dto.getItems().stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum())")
+    @Mapping(target = "totalValue", expression = "java(dto.getItems().stream().map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))).reduce(BigDecimal.ZERO, BigDecimal::add))")
     OrderTotalValue toDocument(OrderDTO dto);
 }
+
