@@ -17,7 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,17 +66,17 @@ public class OrderService {
         ClientOrders clientOrders = clientOrderRepository.getOrdersByClientCode(id, skip, size)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
 
-        return new PageImpl<>(clientOrders.getOrders().values().stream().toList(), PageRequest.of(page, size), clientOrders.getOrdersQuantity());
+        return new PageImpl<>(clientOrders.getOrders(), PageRequest.of(page, size), clientOrders.getOrdersQuantity());
     }
 
     private void storeClientOrder(OrderDTO orderDTO) {
         Order order = orderMapper.toDocument(orderDTO);
         log.trace("Storing order {}", order);
 
-        createClientIfNotExists(orderDTO);
-        appendOrder(orderDTO.getClientCode(), order);
+        createClientIfNotExists(orderDTO.getClientCode());
+        upsertOrder(orderDTO.getClientCode(), order);
 
-        log.debug("stored order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
+        log.debug("Stored order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
     }
 
     private void storeOrderTotalValue(OrderDTO orderDTO) {
@@ -85,23 +85,25 @@ public class OrderService {
         orderTotalValueRepository.save(orderTotalValue);
     }
 
-    private void createClientIfNotExists(OrderDTO orderDTO) {
-        if (!clientOrderRepository.existsById(orderDTO.getClientCode())) {
-            log.debug("Client {} not found, initializing new document", orderDTO.getClientCode());
+    private void createClientIfNotExists(Long clientCode) {
+        if (!clientOrderRepository.existsById(clientCode)) {
+            log.debug("Client {} not found, initializing new document", clientCode);
             clientOrderRepository.save(new ClientOrders(
-                    orderDTO.getClientCode(),
+                    clientCode,
                     0,
-                    new HashMap<>()
+                    new ArrayList<>()
             ));
         }
     }
 
-    private void appendOrder(Long clientCode, Order order) {
-        clientOrderRepository.upsertOrderByClientCode(
-                clientCode,
-                order.getOrderCode(),
-                order
-        );
+    private void upsertOrder(Long clientCode, Order order) {
+        if (clientOrderRepository.existsByClientCodeAndOrdersOrderCode(clientCode, order.getOrderCode())) {
+            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
+        } else {
+            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.createOrder(clientCode, order);
+        }
     }
 
 }
