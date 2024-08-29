@@ -2,10 +2,7 @@ package me.gfumagali.btgpedidos.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -26,6 +23,7 @@ public class ItemDTO {
 
     @JsonProperty("preco")
     @PositiveOrZero(message = "Price must be positive or zero")
+    @Digits(integer = 10, fraction = 2, message = "Price must have up to 10 integer digits and 2 fraction digits")
     @NotNull(message = "Price is required")
     @Schema(description = "Preço do produto", example = "1.5", requiredMode = Schema.RequiredMode.REQUIRED)
     private double price;

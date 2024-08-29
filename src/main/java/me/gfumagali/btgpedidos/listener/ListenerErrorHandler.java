@@ -15,7 +15,6 @@ public class ListenerErrorHandler implements RabbitListenerErrorHandler {
     @Override
     /* Method deprecated and will be removed in the future at org.springframework.amqp package. */
     public Object handleError(Message amqpMessage, org.springframework.messaging.Message<?> message, ListenerExecutionFailedException exception) throws Exception {
-        logError(amqpMessage, message, exception);
         return null;
     }
 
