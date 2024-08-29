@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +31,9 @@ public class OrderService {
 
     @Transactional
     public void create(OrderDTO orderDTO) {
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            executor.submit(() -> storeClientOrder(orderDTO));
-            executor.submit(() -> storeOrderTotalValue(orderDTO));
-            executor.shutdown();
-            log.info("Completed consumption of order {}", orderDTO.getOrderCode());
-        } catch (Exception e) {
-            log.error("Error while consuming order {}", orderDTO.getOrderCode(), e);
-        }
+        storeClientOrder(orderDTO);
+        storeOrderTotalValue(orderDTO);
+        log.info("Completed consumption of order {}", orderDTO.getOrderCode());
     }
 
     public String getTotalValue(Long id) {
@@ -73,8 +66,9 @@ public class OrderService {
         Order order = orderMapper.toDocument(orderDTO);
         log.trace("Storing order {}", order);
 
+        boolean overwrite = isOrderOverwrite(orderDTO.getClientCode(), orderDTO.getOrderCode());
         createClientIfNotExists(orderDTO.getClientCode());
-        upsertOrder(orderDTO.getClientCode(), order);
+        upsertOrder(orderDTO.getClientCode(), order, overwrite);
 
         log.debug("Stored order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
     }
@@ -96,22 +90,24 @@ public class OrderService {
         }
     }
 
-    private void upsertOrder(Long clientCode, Order order) {
-        clientOrderRepository.findByOrdersOrderCode(order.getOrderCode())
-                .ifPresentOrElse(
-                        (client) -> {
-                            if (!order.getOrderCode().equals(client.getClientCode())) {
-                                log.warn("Order {} already exists for client {}", client.getClientCode(), clientCode);
-                                throw new IllegalArgumentException("Código de pedido já existe para o cliente");
-                            }
-                            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
-                            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
-                        },
-                        () -> {
-                            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
-                            clientOrderRepository.createOrder(clientCode, order);
-                        }
-                );
+    private void upsertOrder(Long clientCode, Order order, boolean overwrite) {
+        if (overwrite) {
+            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
+        } else {
+            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.createOrder(clientCode, order);
+        }
+    }
+
+    private boolean isOrderOverwrite(Long clientCode, Long orderCode) {
+        return clientOrderRepository.findByOrdersOrderCode(orderCode)
+                .map(client -> {
+                    if (!client.getClientCode().equals(clientCode))
+                        throw new IllegalArgumentException("Código de pedido já existe para o cliente");
+                    return true;
+                })
+                .orElse(false);
     }
 
 }
