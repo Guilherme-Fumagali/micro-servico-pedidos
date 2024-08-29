@@ -16,7 +16,7 @@ public class ClientOrders {
     @Id
     private Long clientCode;
 
-    private Integer ordersQuantity;
+    private Long ordersQuantity;
 
     private List<Order> orders;
 }

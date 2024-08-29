@@ -90,7 +90,7 @@ public class OrderService {
             log.debug("Client {} not found, initializing new document", clientCode);
             clientOrderRepository.save(new ClientOrders(
                     clientCode,
-                    0,
+                    0L,
                     new ArrayList<>()
             ));
         }
