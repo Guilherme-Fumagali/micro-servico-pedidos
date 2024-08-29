@@ -60,7 +60,7 @@ do
 
     items=$items"]"
 
-    amqp-publish  --host "$RABBITMQ_HOST" \
+    amqp-publish  --server "$RABBITMQ_HOST" \
                   --port "$RABBITMQ_PORT" \
                   --username "$RABBITMQ_USERNAME" \
                   --password "$RABBITMQ_PASSWORD" \
