@@ -15,7 +15,8 @@ public interface ClientOrderRepository extends MongoRepository<ClientOrders, Lon
     @Query(fields = "{ 'orders' : { '$slice' : [?1, ?2] }, 'ordersQuantity' : 1 }", value = "{ 'clientCode' : ?0 }")
     Optional<ClientOrders> getOrdersByClientCode(Long clientCode, Integer skip, Integer limit);
 
-    boolean existsByClientCodeAndOrdersOrderCode(Long clientCode, Long orderCode);
+    @Query(fields = "{ '_id' : 1 }")
+    Optional<ClientOrders> findByOrdersOrderCode(Long orderCode);
 
     @Query("{ 'clientCode' : ?0}")
     @Update("{ '$push' : { orders : ?1 }, '$inc' : { ordersQuantity : 1 } }")

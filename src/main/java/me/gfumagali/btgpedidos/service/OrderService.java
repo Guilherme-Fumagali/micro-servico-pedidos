@@ -97,13 +97,21 @@ public class OrderService {
     }
 
     private void upsertOrder(Long clientCode, Order order) {
-        if (clientOrderRepository.existsByClientCodeAndOrdersOrderCode(clientCode, order.getOrderCode())) {
-            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
-            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
-        } else {
-            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
-            clientOrderRepository.createOrder(clientCode, order);
-        }
+        clientOrderRepository.findByOrdersOrderCode(order.getOrderCode())
+                .ifPresentOrElse(
+                        (client) -> {
+                            if (!order.getOrderCode().equals(client.getClientCode())) {
+                                log.warn("Order {} already exists for client {}", client.getClientCode(), clientCode);
+                                throw new IllegalArgumentException("Código de pedido já existe para o cliente");
+                            }
+                            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
+                            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
+                        },
+                        () -> {
+                            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
+                            clientOrderRepository.createOrder(clientCode, order);
+                        }
+                );
     }
 
 }
