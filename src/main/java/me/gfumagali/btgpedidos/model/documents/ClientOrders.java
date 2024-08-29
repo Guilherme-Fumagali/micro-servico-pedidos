@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 @Data
 @AllArgsConstructor
 @Document(collection = "clientOrders")
+@CompoundIndex(name = "uniqueOrderCode", def = "{'orders.orderCode' : 1}", unique = true)
 @Tag(name = "ClientOrders", description = "Documentos de pedidos de clientes")
 public class ClientOrders {
     @Id
