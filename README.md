@@ -7,7 +7,7 @@
   * [Visão geral](#visão-geral)
     * [Dados de entrada](#dados-de-entrada)
       * [Restrições](#restrições)
-  * [Início rápido](#início-rápido)
+  * [**Início rápido**](#início-rápido)
   * [Repositório](#repositório)
   * [Serviços de apoio](#serviços-de-apoio)
   * [Variáveis de ambiente](#variáveis-de-ambiente)
@@ -80,7 +80,7 @@ O método inscrito na fila de pedidos espera um dado no formato `application/jso
 | _quantidade_    | Positivo maior que zero                                           |
 | _preco_         | Positivo ou zero, com no máximo dez dígitos e duas casas decimais |
 
-## Início rápido
+## **Início rápido**
 
 Instância da aplicação e serviços de apoio:
 
