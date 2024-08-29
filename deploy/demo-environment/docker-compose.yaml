@@ -4,6 +4,7 @@ networks:
 services:
   app:
     image: gfumagali/micro-servico-pedidos:latest
+    container_name: micro-servico-pedidos
     restart: unless-stopped
     environment:
       RABBITMQ_HOST: rabbitmq
