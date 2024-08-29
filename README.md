@@ -7,6 +7,8 @@
   * [Visão geral](#visão-geral)
     * [Dados de entrada](#dados-de-entrada)
       * [Restrições](#restrições)
+  * [Início rápido](#início-rápido)
+  * [Repositório](#repositório)
   * [Serviços de apoio](#serviços-de-apoio)
   * [Variáveis de ambiente](#variáveis-de-ambiente)
   * [Executando a aplicação](#executando-a-aplicação)
@@ -28,7 +30,7 @@ Sendo responsável por extrair de pedidos as informações de:
 - Quantidade de pedidos realizados por um cliente;
 - Lista de pedidos realizados por um cliente.
 
-Tornando acessível esses dados através de endpoint em uma _API REST_. A figura abaixo ilustra o funcionamento do micro
+Tornando acessível esses dados por endpoints em uma _API REST_. A figura abaixo ilustra o funcionamento do micro
 serviço.
 
 <img src="static/visao_geral.png" alt="Visão geral do micro serviço" />
@@ -36,7 +38,7 @@ serviço.
 Essa aplicação foi desenvolvida com o _JDK Java_ versão 21 com o [_Spring Framework_](https://spring.io/), com a
 ferramenta de build [_Gradle_](https://gradle.org/).
 
-**A aplicação para ser executada precisa de no mínimo um SO com Docker e Docker Compose instalados.**
+**A aplicação para ser executada precisa de no mínimo um SO com Git, Docker e Docker Compose instalados.**
 
 Ambiente de desenvolvimento:
 
@@ -51,13 +53,13 @@ O método inscrito na fila de pedidos espera um dado no formato `application/jso
 
 ```json
 {
-  "codigoPedido": int,
-  "codigoCliente": int,
+  "codigoPedido": "int",
+  "codigoCliente": "int",
   "itens": [
     {
-      "produto": string,
-      "quantidade": int,
-      "preco": double
+      "produto": "string",
+      "quantidade": "int",
+      "preco": "double"
     }
   ]
 }
@@ -78,13 +80,42 @@ O método inscrito na fila de pedidos espera um dado no formato `application/jso
 | _quantidade_    | Positivo maior que zero                                           |
 | _preco_         | Positivo ou zero, com no máximo dez dígitos e duas casas decimais |
 
+## Início rápido
+
+Instância da aplicação e serviços de apoio:
+
+```bash
+git clone https://github.com/Guilherme-Fumagali/micro-servico-pedidos.git
+cd micro-servico-pedidos
+
+docker-compose -f deploy/demo-environment/docker-compose.yaml up
+```
+
+Popula a fila de pedidos com 100 pedidos de clientes de código variando entre 1 e 100 aleatoriamente:
+
+```bash
+docker exec -it micro-servico-pedidos /app/scripts/produtor_pedidos.sh 100 10000 10
+```
+
+Acesse a documentação da _API_
+em [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html).
+
+## Repositório
+
+As seções abaixo detalham como configurar e executar a aplicação. Antes, clone o repositório:
+
+```bash
+git clone https://github.com/Guilherme-Fumagali/micro-servico-pedidos.git
+cd micro-servico-pedidos
+```
+
 ## Serviços de apoio
 
 **Obs: Você pode pular essa seção se deseja apenas usar a aplicação
-na [versão de demonstração](#Usando-docker-compose-de-demonstração-(mais-rápido-e-já-sobe-serviços-de-apoio)).**
+na [versão de demonstração](#Versão-de-demonstração-com-Docker-Compose).**
 
 A aplicação usa um Banco de Dados orientado a documentos [_MongoDB_](https://www.mongodb.com/) para armazenar os
-pedidos, e um serviço de mensageria [_RabbitMQ_](RabbitMQ) para receber os pedidos.
+pedidos, e um serviço de mensageria [_RabbitMQ_](https://www.rabbitmq.com/) para receber os pedidos.
 
 As versões listadas abaixo foram usadas durante o desenvolvimento estão declaradas no `docker-compose`
 do [ambiente de desenvolvimento](deploy/dev-environment/docker-compose.yaml).
