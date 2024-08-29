@@ -3,15 +3,12 @@ package me.gfumagali.btgpedidos.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import me.gfumagali.btgpedidos.model.documents.Order;
 import me.gfumagali.btgpedidos.service.OrderService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,8 +39,11 @@ public class ClientController {
                     @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
             }
     )
-    public List<Order> getOrders(@PathVariable Long codigoCliente) {
-        return orderService.getOrders(codigoCliente);
+    public Page<Order> getOrders(@PathVariable Long codigoCliente,
+                                 @RequestParam(required = false, defaultValue = "0") Integer page,
+                                 @RequestParam(required = false, defaultValue = "10") @Max(value = 100, message = "O tamanho máximo permitido da página é 100") Integer size
+    ) {
+        return orderService.getOrders(codigoCliente, page, size);
     }
 
 }

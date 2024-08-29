@@ -6,7 +6,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashMap;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +16,7 @@ public class ClientOrders {
     @Id
     private Long clientCode;
 
-    private Integer ordersQuantity;
+    private Long ordersQuantity;
 
-    private HashMap<Long, Order> orders;
+    private List<Order> orders;
 }

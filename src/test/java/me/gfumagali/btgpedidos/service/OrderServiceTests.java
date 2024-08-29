@@ -19,13 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +52,7 @@ public class OrderServiceTests {
     @Test
     public void whenGetTotalValue_thenReturnTotalValue() {
         // Given
-        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, 100.0)));
+        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, BigDecimal.valueOf(100.0))));
 
         // When
         String totalValue = orderService.getTotalValue(1L);
@@ -77,7 +80,7 @@ public class OrderServiceTests {
     @Test
     public void whenGetTotalValueWithFloat_thenReturnTotalValue() {
         // Given
-        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, 100.31)));
+        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, BigDecimal.valueOf(100.31))));
 
         // When
         String totalValue = orderService.getTotalValue(1L);
@@ -91,7 +94,7 @@ public class OrderServiceTests {
     @Test
     public void whenGetTotalValueWithZero_thenReturnTotalValue() {
         // Given
-        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, 0.0)));
+        when(orderTotalValueRepository.findById(1L)).thenReturn(Optional.of(new OrderTotalValue(1L, BigDecimal.ZERO)));
 
         // When
         String totalValue = orderService.getTotalValue(1L);
@@ -99,13 +102,13 @@ public class OrderServiceTests {
         // Then
         verify(orderTotalValueRepository, times(1)).findById(1L);
         verifyNoMoreInteractions(orderTotalValueRepository);
-        assertEquals("0.0", totalValue);
+        assertEquals("0", totalValue);
     }
 
     @Test
     public void whenGetOrdersQuantity_thenReturnOrdersQuantity() {
         // Given
-        ClientOrders ClientOrders = new ClientOrders(1L, 3, new HashMap<>());
+        ClientOrders ClientOrders = new ClientOrders(1L, 3L, new ArrayList<>());
         when(clientOrderRepository.getOrdersQuantityByClientCode(1L)).thenReturn(Optional.of(ClientOrders));
 
         // When
@@ -136,160 +139,148 @@ public class OrderServiceTests {
         // Given
         Order order1 = new Order(1L, LocalDateTime.now(), List.of(getExampleItemDTO(1)));
         Order order2 = new Order(2L, LocalDateTime.now(), List.of(getExampleItemDTO(2)));
-        HashMap<Long, Order> orders = new HashMap<>();
-        orders.put(1L, order1);
-        orders.put(2L, order2);
-        ClientOrders clientOrders = new ClientOrders(1L, 2, orders);
-        when(clientOrderRepository.getOrdersByClientCode(1L)).thenReturn(Optional.of(clientOrders));
+        List<Order> orders = List.of(order1, order2);
+
+        ClientOrders clientOrders = new ClientOrders(1L, 3L, orders);
+        when(clientOrderRepository.getOrdersByClientCode(1L, 0, 10)).thenReturn(Optional.of(clientOrders));
 
         // When
-        List<Order> ordersList = orderService.getOrders(1L);
+        Page<Order> ordersPage = orderService.getOrders(1L, 0, 10);
 
         // Then
-        verify(clientOrderRepository, times(1)).getOrdersByClientCode(1L);
+        verify(clientOrderRepository, times(1)).getOrdersByClientCode(1L, 0, 10);
         verifyNoMoreInteractions(clientOrderRepository);
-        assertEquals(2, ordersList.size());
-        assertEquals(1L, ordersList.get(0).getOrderCode());
-        assertEquals(2L, ordersList.get(1).getOrderCode());
+        assertEquals(2, ordersPage.getTotalElements());
+        assertEquals(1L, ordersPage.getContent().get(0).getOrderCode());
+        assertEquals(2L, ordersPage.getContent().get(1).getOrderCode());
+
     }
 
+    @Test
+    public void whenGetOrdersWithMorePages_thenReturnOrders() {
+        // Given
+        Order order1 = new Order(1L, LocalDateTime.now(), List.of(getExampleItemDTO(1)));
+        Order order2 = new Order(2L, LocalDateTime.now(), List.of(getExampleItemDTO(2)));
+        List<Order> orders = List.of(order1, order2);
+
+        ClientOrders clientOrders = new ClientOrders(1L, 3L, orders);
+        when(clientOrderRepository.getOrdersByClientCode(1L, 0, 2)).thenReturn(Optional.of(clientOrders));
+
+        // When
+        Page<Order> ordersPage = orderService.getOrders(1L, 0, 2);
+
+        // Then
+        verify(clientOrderRepository, times(1)).getOrdersByClientCode(1L, 0, 2);
+        verifyNoMoreInteractions(clientOrderRepository);
+        assertEquals(3, ordersPage.getTotalElements());
+        assertEquals(1L, ordersPage.getContent().get(0).getOrderCode());
+        assertEquals(2L, ordersPage.getContent().get(1).getOrderCode());
+    }
+
+    @Test
+    public void whenGetOrdersWithPageGreaterThanZero_thenCalculateOffset() {
+        // Given
+        Integer page = 2;
+        Integer size = 10;
+        ClientOrders clientOrders = new ClientOrders(1L, 3L, new ArrayList<>());
+        when(clientOrderRepository.getOrdersByClientCode(1L, 20, 10)).thenReturn(Optional.of(clientOrders));
+
+        // When
+        orderService.getOrders(1L, page, size);
+
+        // Then
+        verify(clientOrderRepository, times(1)).getOrdersByClientCode(1L, 20, 10);
+        verifyNoMoreInteractions(clientOrderRepository);
+    }
 
     @Test
     public void whenCreateOrder_thenStoreOrder() {
         // Given
         List<ItemDTO> items = List.of(
-                getExampleItemDTO(1, 25.5),
-                getExampleItemDTO(1, 25.75),
-                getExampleItemDTO(3, 16.25)
+                getExampleItemDTO(1, BigDecimal.valueOf(25.5)),
+                getExampleItemDTO(1, BigDecimal.valueOf(25.75)),
+                getExampleItemDTO(3, BigDecimal.valueOf(16.25))
         );
         OrderDTO orderDTO = new OrderDTO(1L, 1L, items);
 
         ArgumentCaptor<ClientOrders> clientOrdersCaptor = ArgumentCaptor.forClass(ClientOrders.class);
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
         ArgumentCaptor<OrderTotalValue> orderTotalValueCaptor = ArgumentCaptor.forClass(OrderTotalValue.class);
-
-        when(clientOrderRepository.findById(1L)).thenReturn(Optional.empty()); // First order for client
 
         // When
         orderService.create(orderDTO);
 
         // Then
         verify(clientOrderRepository, times(1)).save(clientOrdersCaptor.capture());
+        verify(clientOrderRepository, times(1)).createOrder(eq(1L), orderCaptor.capture());
         verify(orderTotalValueRepository, times(1)).save(orderTotalValueCaptor.capture());
-        verifyNoMoreInteractions(clientOrderRepository, orderTotalValueRepository);
 
-        assertEquals(1L, clientOrdersCaptor.getValue().getClientCode());
-        assertEquals(1, clientOrdersCaptor.getValue().getOrdersQuantity());
-        assertEquals(1L, clientOrdersCaptor.getValue().getOrders().get(1L).getOrderCode());
-        assertEquals(1, clientOrdersCaptor.getValue().getOrders().size());
+        ClientOrders clientOrders = clientOrdersCaptor.getValue();
+        Order order = orderCaptor.getValue();
 
-        assertEquals(1L, orderTotalValueCaptor.getValue().getOrderCode());
-        assertEquals(100.0, orderTotalValueCaptor.getValue().getTotalValue());
+        assertEquals(1L, clientOrders.getClientCode());
+        assertEquals(1L, order.getOrderCode());
+        assertEquals(3, order.getItems().size());
+
+        OrderTotalValue orderTotalValue = orderTotalValueCaptor.getValue();
+
+        assertEquals(1L, orderTotalValue.getOrderCode());
     }
 
     @Test
     public void whenCreateOrderWithExistingClient_thenStoreOrder() {
         // Given
         List<ItemDTO> items = List.of(
-                getExampleItemDTO(1, 25.5),
-                getExampleItemDTO(1, 25.75),
-                getExampleItemDTO(3, 16.25)
+                getExampleItemDTO(1, BigDecimal.valueOf(25.5)),
+                getExampleItemDTO(1, BigDecimal.valueOf(25.75)),
+                getExampleItemDTO(3, BigDecimal.valueOf(16.25))
         );
         OrderDTO orderDTO = new OrderDTO(2L, 1L, items);
 
         ArgumentCaptor<ClientOrders> clientOrdersCaptor = ArgumentCaptor.forClass(ClientOrders.class);
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
         ArgumentCaptor<OrderTotalValue> orderTotalValueCaptor = ArgumentCaptor.forClass(OrderTotalValue.class);
-
-        Order order = new Order(1L, LocalDateTime.now(), items);
-        HashMap<Long, Order> orders = new HashMap<>();
-        orders.put(1L, order);
-        ClientOrders clientOrders = new ClientOrders(1L, 1, orders);
-
-        when(clientOrderRepository.findById(1L)).thenReturn(Optional.of(clientOrders));
 
         // When
         orderService.create(orderDTO);
 
         // Then
         verify(clientOrderRepository, times(1)).save(clientOrdersCaptor.capture());
+        verify(clientOrderRepository, times(1)).createOrder(eq(1L), orderCaptor.capture());
         verify(orderTotalValueRepository, times(1)).save(orderTotalValueCaptor.capture());
-        verifyNoMoreInteractions(clientOrderRepository, orderTotalValueRepository);
 
-        assertEquals(1L, clientOrdersCaptor.getValue().getClientCode());
-        assertEquals(2, clientOrdersCaptor.getValue().getOrdersQuantity());
-        assertEquals(2, clientOrdersCaptor.getValue().getOrders().size());
+        ClientOrders clientOrdersSaved = clientOrdersCaptor.getValue();
+        Order orderSaved = orderCaptor.getValue();
 
-        assertEquals(1L, clientOrdersCaptor.getValue().getOrders().get(1L).getOrderCode());
-        assertEquals(2L, clientOrdersCaptor.getValue().getOrders().get(2L).getOrderCode());
+        assertEquals(1L, clientOrdersSaved.getClientCode());
+        assertEquals(2, orderSaved.getOrderCode());
 
         assertEquals(2L, orderTotalValueCaptor.getValue().getOrderCode());
-        assertEquals(100.0, orderTotalValueCaptor.getValue().getTotalValue());
     }
 
-    @Test
-    public void whenCreateOrderWithSameId_thenOverwriteOrder() {
-        // Given
-        List<ItemDTO> newItems = List.of(
-                getExampleItemDTO(1, 200.0)
-        );
-        OrderDTO orderDTO = new OrderDTO(1L, 1L, newItems);
-
-        ArgumentCaptor<ClientOrders> clientOrdersCaptor = ArgumentCaptor.forClass(ClientOrders.class);
-        ArgumentCaptor<OrderTotalValue> orderTotalValueCaptor = ArgumentCaptor.forClass(OrderTotalValue.class);
-
-        List<ItemDTO> previouslyItems = List.of(
-                getExampleItemDTO(1, 25.5),
-                getExampleItemDTO(1, 25.75),
-                getExampleItemDTO(3, 16.25)
-        );
-        Order savedOrder = new Order(1L, LocalDateTime.now(), previouslyItems);
-        HashMap<Long, Order> orders = new HashMap<>();
-        orders.put(1L, savedOrder);
-        ClientOrders clientOrders = new ClientOrders(1L, 1, orders);
-
-        when(clientOrderRepository.findById(1L)).thenReturn(Optional.of(clientOrders));
-
-        // When
-        orderService.create(orderDTO);
-
-        // Then
-        verify(clientOrderRepository, times(1)).save(clientOrdersCaptor.capture());
-        verify(orderTotalValueRepository, times(1)).save(orderTotalValueCaptor.capture());
-        verifyNoMoreInteractions(clientOrderRepository, orderTotalValueRepository);
-
-        assertEquals(1L, clientOrdersCaptor.getValue().getClientCode());
-        assertEquals(1, clientOrdersCaptor.getValue().getOrdersQuantity());
-        assertEquals(1L, clientOrdersCaptor.getValue().getOrders().get(1L).getOrderCode());
-
-        assertNotEquals(savedOrder, clientOrdersCaptor.getValue().getOrders().get(1L));
-        assertEquals(1, clientOrdersCaptor.getValue().getOrders().get(1L).getItems().size());
-        assertEquals(200.0, clientOrdersCaptor.getValue().getOrders().get(1L).getItems().getFirst().getPrice());
-
-        assertEquals(1L, orderTotalValueCaptor.getValue().getOrderCode());
-        assertEquals(200.0, orderTotalValueCaptor.getValue().getTotalValue());
-    }
 
     @Test
-    public void whenCreateOrderWithException_thenNotThrowException() {
+    public void whenCreateOrderWithException_throwException() {
         // Given
         List<ItemDTO> items = List.of(
-                getExampleItemDTO(1, 25.5),
-                getExampleItemDTO(1, 25.75),
-                getExampleItemDTO(3, 16.25)
+                getExampleItemDTO(1, BigDecimal.valueOf(25.5)),
+                getExampleItemDTO(1, BigDecimal.valueOf(25.75)),
+                getExampleItemDTO(3, BigDecimal.valueOf(16.25))
         );
         OrderDTO orderDTO = new OrderDTO(1L, 1L, items);
 
-        when(clientOrderRepository.findById(1L)).thenThrow(new RuntimeException("Error"));
+        when(clientOrderRepository.save(any())).thenThrow(new RuntimeException("Error"));
 
         // When & Then
-        assertDoesNotThrow(() -> orderService.create(orderDTO));
+        assertThrows(RuntimeException.class, () -> orderService.create(orderDTO));
     }
 
 
     private ItemDTO getExampleItemDTO(int quantity) {
-        return new ItemDTO("Product", quantity, 10.0);
+        return new ItemDTO("Product", quantity, BigDecimal.valueOf(10));
     }
 
-    private ItemDTO getExampleItemDTO(int quantity, double price) {
+    private ItemDTO getExampleItemDTO(int quantity, BigDecimal price) {
         return new ItemDTO("Product", quantity, price);
     }
 }

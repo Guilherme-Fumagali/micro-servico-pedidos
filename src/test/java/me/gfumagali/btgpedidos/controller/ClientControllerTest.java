@@ -8,13 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -45,19 +48,19 @@ public class ClientControllerTest {
     public void whenGetOrders_thenReturnOrders() throws Exception {
         // Given
         Order order = new Order(1L, LocalDateTime.of(2021, 1, 1, 0, 0), List.of(
-                getExampleItemDTO(1, 25.5),
-                getExampleItemDTO(1, 25.75),
-                getExampleItemDTO(3, 16.25)
+                getExampleItemDTO(1, BigDecimal.valueOf(25.5)),
+                getExampleItemDTO(1, BigDecimal.valueOf(25.75)),
+                getExampleItemDTO(3, BigDecimal.valueOf(16.25))
         ));
 
-        when(orderService.getOrders(1L)).thenReturn(List.of(order));
+        when(orderService.getOrders(1L, 0, 10)).thenReturn(new PageImpl<>(List.of(order)));
 
         // When & Then
         mockMvc.perform(get("/cliente/pedidos/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[" + getJson(order) + "]"));
+                .andExpect(content().string(containsString(getJson(order))));
 
-        verify(orderService, times(1)).getOrders(1L);
+        verify(orderService, times(1)).getOrders(1L, 0, 10);
     }
 
     @Test
@@ -76,14 +79,14 @@ public class ClientControllerTest {
     @Test
     public void whenGetOrders_thenThrowResourceNotFoundException() throws Exception {
         // Given
-        when(orderService.getOrders(1L)).thenThrow(new ResourceNotFoundException("Cliente não encontrado"));
+        when(orderService.getOrders(1L, 0, 10)).thenThrow(new ResourceNotFoundException("Cliente não encontrado"));
 
         // When & Then
         mockMvc.perform(get("/cliente/pedidos/1"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Cliente não encontrado"));
 
-        verify(orderService, times(1)).getOrders(1L);
+        verify(orderService, times(1)).getOrders(1L, 0, 10);
     }
 
     private String getJson(Order order) {
@@ -95,12 +98,9 @@ public class ClientControllerTest {
     private String getJson(ItemDTO item) {
         return "{\"produto\":\"" + item.getProduct() + "\",\"quantidade\":" + item.getQuantity() + ",\"preco\":" + item.getPrice() + "}";
     }
+    
 
-    private ItemDTO getExampleItemDTO(int quantity) {
-        return new ItemDTO("Product", quantity, 10.0);
-    }
-
-    private ItemDTO getExampleItemDTO(int quantity, double price) {
+    private ItemDTO getExampleItemDTO(int quantity, BigDecimal price) {
         return new ItemDTO("Product", quantity, price);
     }
 }

@@ -11,14 +11,13 @@ import me.gfumagali.btgpedidos.model.mappers.OrderMapper;
 import me.gfumagali.btgpedidos.model.mappers.OrderTotalValueMapper;
 import me.gfumagali.btgpedidos.repository.ClientOrderRepository;
 import me.gfumagali.btgpedidos.repository.OrderTotalValueRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +31,9 @@ public class OrderService {
 
     @Transactional
     public void create(OrderDTO orderDTO) {
-        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            executor.submit(() -> storeClientOrder(orderDTO));
-            executor.submit(() -> storeOrderTotalValue(orderDTO));
-            executor.shutdown();
-            log.info("Completed consumption of order {}", orderDTO.getOrderCode());
-        } catch (Exception e) {
-            log.error("Error while consuming order {}", orderDTO.getOrderCode(), e);
-        }
+        storeClientOrder(orderDTO);
+        storeOrderTotalValue(orderDTO);
+        log.info("Completed consumption of order {}", orderDTO.getOrderCode());
     }
 
     public String getTotalValue(Long id) {
@@ -59,24 +53,24 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
-    public List<Order> getOrders(Long id) {
-        log.debug("Retrieving orders for client {}", id);
-        return clientOrderRepository.getOrdersByClientCode(id)
-                .map(ClientOrders::getOrders)
-                .map(HashMap::values)
-                .map(ArrayList::new)
+    public Page<Order> getOrders(Long id, Integer page, Integer size) {
+        log.debug("Retrieving orders for client {} with page {} and size {}", id, page, size);
+        final var skip = page * size;
+        ClientOrders clientOrders = clientOrderRepository.getOrdersByClientCode(id, skip, size)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
+
+        return new PageImpl<>(clientOrders.getOrders(), PageRequest.of(page, size), clientOrders.getOrdersQuantity());
     }
 
     private void storeClientOrder(OrderDTO orderDTO) {
         Order order = orderMapper.toDocument(orderDTO);
         log.trace("Storing order {}", order);
 
-        ClientOrders clientOrders = getOrCreateClientOrders(orderDTO);
-        appendOrder(clientOrders, order);
+        boolean overwrite = isOrderOverwrite(orderDTO.getClientCode(), orderDTO.getOrderCode());
+        createClientIfNotExists(orderDTO.getClientCode());
+        upsertOrder(orderDTO.getClientCode(), order, overwrite);
 
-        log.debug("Storing order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
-        clientOrderRepository.save(clientOrders);
+        log.debug("Stored order {} for client {}", orderDTO.getOrderCode(), orderDTO.getClientCode());
     }
 
     private void storeOrderTotalValue(OrderDTO orderDTO) {
@@ -85,22 +79,35 @@ public class OrderService {
         orderTotalValueRepository.save(orderTotalValue);
     }
 
-    private ClientOrders getOrCreateClientOrders(OrderDTO orderDTO) {
-        return clientOrderRepository.findById(orderDTO.getClientCode()).orElseGet(() -> {
-            log.debug("Client {} not found, initializing new document", orderDTO.getClientCode());
-
-            return new ClientOrders(
-                    orderDTO.getClientCode(),
-                    0,
-                    new HashMap<>()
-            );
-        });
+    private void createClientIfNotExists(Long clientCode) {
+        if (!clientOrderRepository.existsById(clientCode)) {
+            log.debug("Client {} not found, initializing new document", clientCode);
+            clientOrderRepository.save(new ClientOrders(
+                    clientCode,
+                    0L,
+                    new ArrayList<>()
+            ));
+        }
     }
 
-    private void appendOrder(ClientOrders clientOrders, Order order) {
-        clientOrders.getOrders().put(order.getOrderCode(), order);
-        clientOrders.setOrdersQuantity(clientOrders.getOrders().size());
-        log.trace("Quantity of orders for client {} is now {}", order.getOrderCode(), clientOrders.getOrdersQuantity());
+    private void upsertOrder(Long clientCode, Order order, boolean overwrite) {
+        if (overwrite) {
+            log.debug("Replacing order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.replaceOrder(clientCode, order.getOrderCode(), order);
+        } else {
+            log.debug("Creating order {} for client {}", order.getOrderCode(), clientCode);
+            clientOrderRepository.createOrder(clientCode, order);
+        }
+    }
+
+    private boolean isOrderOverwrite(Long clientCode, Long orderCode) {
+        return clientOrderRepository.findByOrdersOrderCode(orderCode)
+                .map(client -> {
+                    if (!client.getClientCode().equals(clientCode))
+                        throw new IllegalArgumentException("Código de pedido já existe para o cliente");
+                    return true;
+                })
+                .orElse(false);
     }
 
 }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import me.gfumagali.btgpedidos.model.dto.ItemDTO;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class Order {
     @JsonProperty("codigoPedido")
     @Schema(description = "Código do pedido", example = "1")
+    @Indexed(unique = true)
     private Long orderCode;
 
     @JsonProperty("dataPedido")
