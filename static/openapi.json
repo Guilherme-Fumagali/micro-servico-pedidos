@@ -1,0 +1,270 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Microserviço de Pedidos",
+    "description": "API REST para exibição de dados de pedidos de clientes consumidos de uma fila",
+    "contact": {
+      "name": "Guilherme Fumagali",
+      "email": "guilhermefumarques@gmail.com"
+    },
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Pedido",
+      "description": "Recuperação de dados de pedidos"
+    },
+    {
+      "name": "Cliente",
+      "description": "Recuperação de dados de compras a partir do código do cliente"
+    }
+  ],
+  "paths": {
+    "/pedido/valor-total/{codigoPedido}": {
+      "get": {
+        "tags": [
+          "Pedido"
+        ],
+        "summary": "Valor total",
+        "description": "Recupera o valor total de um pedido a partir de seu código",
+        "operationId": "getTotalValue",
+        "parameters": [
+          {
+            "name": "codigoPedido",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Valor total recuperado com sucesso",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pedido não encontrado",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cliente/pedidos/{codigoCliente}": {
+      "get": {
+        "tags": [
+          "Cliente"
+        ],
+        "summary": "Pedidos",
+        "description": "Recupera os pedidos de um cliente a partir de seu código",
+        "operationId": "getOrders",
+        "parameters": [
+          {
+            "name": "codigoCliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pedidos recuperados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelPedido"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedModelPedido"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cliente/pedidos/{codigoCliente}/quantidade": {
+      "get": {
+        "tags": [
+          "Cliente"
+        ],
+        "summary": "Quantidade de pedidos",
+        "description": "Recupera a quantidade de pedidos de um cliente a partir de seu código",
+        "operationId": "getOrdersQuantity",
+        "parameters": [
+          {
+            "name": "codigoCliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quantidade de pedidos recuperada com sucesso",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Item": {
+        "required": [
+          "preco",
+          "produto",
+          "quantidade"
+        ],
+        "type": "object",
+        "properties": {
+          "produto": {
+            "type": "string",
+            "description": "Nome do produto",
+            "example": "Lápis"
+          },
+          "quantidade": {
+            "type": "integer",
+            "description": "Quantidade do produto",
+            "format": "int32",
+            "example": 10
+          },
+          "preco": {
+            "type": "number",
+            "description": "Preço do produto",
+            "example": 1.5
+          }
+        },
+        "description": "DTO para leitura de uma unidade de produto no registro de Pedido consumido da fila"
+      },
+      "PageMetadata": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PagedModelPedido": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pedido"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "Pedido": {
+        "type": "object",
+        "properties": {
+          "codigoPedido": {
+            "type": "integer",
+            "description": "Código do pedido",
+            "format": "int64",
+            "example": 1
+          },
+          "dataPedido": {
+            "type": "string",
+            "description": "Data do pedido no formato ISO 8601",
+            "format": "date-time"
+          },
+          "itens": {
+            "type": "array",
+            "description": "Itens do pedido",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        },
+        "description": "DTO para exibição de um registro de Pedido"
+      }
+    }
+  }
+}
