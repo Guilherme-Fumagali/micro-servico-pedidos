@@ -1,0 +1,48 @@
+networks:
+  demo-micro-servico-pedidos:
+
+services:
+  app:
+    image: gfumagali/micro-servico-pedidos:latest
+    container_name: micro-servico-pedidos
+    restart: unless-stopped
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      MONGODB_HOST: mongo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - demo-micro-servico-pedidos
+
+  mongo:
+    image: mongo:7-jammy
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    hostname: mongo
+    networks:
+      - demo-micro-servico-pedidos
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    hostname: rabbitmq
+    networks:
+      - demo-micro-servico-pedidos
+
+volumes:
+  mongo_data:
