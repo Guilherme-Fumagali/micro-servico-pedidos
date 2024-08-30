@@ -95,10 +95,10 @@ cd micro-servico-pedidos
 docker compose -f deploy/demo-environment/docker-compose.yaml up
 ```
 
-Popula a fila de pedidos com 100 pedidos de clientes de código variando entre 1 e 100 aleatoriamente:
+Popula a fila de pedidos com 1000 pedidos de clientes de código variando entre 1 e 100 aleatoriamente:
 
 ```bash
-docker exec -it micro-servico-pedidos /app/scripts/produtor_pedidos.sh 100 10000 10
+docker exec -it micro-servico-pedidos /app/scripts/produtor_pedidos.sh 100 1000 10
 ```
 
 Acesse a documentação da _API_
