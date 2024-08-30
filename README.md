@@ -92,7 +92,7 @@ Instância da aplicação e serviços de apoio:
 git clone https://github.com/Guilherme-Fumagali/micro-servico-pedidos.git
 cd micro-servico-pedidos
 
-docker-compose -f deploy/demo-environment/docker-compose.yaml up
+docker compose -f deploy/demo-environment/docker-compose.yaml up
 ```
 
 Popula a fila de pedidos com 100 pedidos de clientes de código variando entre 1 e 100 aleatoriamente:
@@ -132,7 +132,7 @@ do [ambiente de desenvolvimento](deploy/dev-environment/docker-compose.yaml).
 Para instanciar esse ambiente, execute:
 
 ```bash
-docker-compose -f deploy/dev-environment/docker-compose.yaml up
+docker compose -f deploy/dev-environment/docker-compose.yaml up
 ```
 
 Por _default_, os valores padrões definidos na aplicação são os mesmos listados acima. Se deseja usar um ambiente
@@ -169,7 +169,7 @@ O arquivo o [`docker-compose` em `deploy/demo-environment/](deploy/demo-environm
 para usar essa imagem junto aos serviços de apoio. Para subir o ambiente de demonstração, execute:
 
 ```bash
-docker-compose -f deploy/demo-environment/docker-compose.yaml up
+docker compose -f deploy/demo-environment/docker-compose.yaml up
 ```
 
 Confira se a aplicação está funcionando acessando a documentação da _API_
