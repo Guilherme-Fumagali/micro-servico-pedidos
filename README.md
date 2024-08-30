@@ -57,12 +57,12 @@ O método inscrito na fila de pedidos espera um dado no formato `application/jso
 
 ```json
 {
-  "codigoPedido": "int",
-  "codigoCliente": "int",
+  "codigoPedido": "long",
+  "codigoCliente": "long",
   "itens": [
     {
       "produto": "string",
-      "quantidade": "int",
+      "quantidade": "long",
       "preco": "double"
     }
   ]
