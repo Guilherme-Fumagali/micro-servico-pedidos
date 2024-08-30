@@ -1,4 +1,8 @@
 > Aplicação desenvolvida para _case_ técnico
+> 
+> Imagem no DockerHub: https://hub.docker.com/r/gfumagali/micro-servico-pedidos/
+> 
+> Guia rápido: consulte a seção [**Início rápido**](#início-rápido)
 
 # Micro serviço de processamento de pedidos
 
